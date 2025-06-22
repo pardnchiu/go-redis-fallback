@@ -14,7 +14,7 @@ func getPath(config Config, key string) Path {
 	layer2 := encode[2:4]
 	layer3 := encode[4:6]
 	filename := encode + ".json"
-	folderPath := filepath.Join(config.Options.DBPath, strconv.Itoa(config.Redis.DB), layer1, layer2, layer3)
+	folderPath := filepath.Join(config.Option.DBPath, strconv.Itoa(config.Redis.DB), layer1, layer2, layer3)
 
 	return Path{
 		folderPath: folderPath,

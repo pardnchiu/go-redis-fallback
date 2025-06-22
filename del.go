@@ -16,7 +16,7 @@ func (rf *RedisFallback) Del(key string) error {
 		ctx := context.Background()
 		err := rf.redis.Del(ctx, key).Err()
 		if err != nil {
-			return rf.logger.error(err, "Failed to delete")
+			return rf.logger.Error(err, "Failed to delete")
 		}
 	}
 	return nil

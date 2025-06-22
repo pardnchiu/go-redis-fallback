@@ -8,26 +8,21 @@ import (
 	"strings"
 	"time"
 
+	goLogger "github.com/pardnchiu/go-logger"
 	"github.com/redis/go-redis/v9"
 )
 
 func New(c Config) (*RedisFallback, error) {
-	// * Initialize logger
-	logger, err := initLogger(c)
+	c.Log = validLoggerConfig(c)
+	c.Option = validOptionData(c)
+
+	logger, err := goLogger.New(c.Log)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to initialize `pardnchiu/go-logger`: %w", err)
 	}
 
 	// * Initialize Redis
 	redisClient := initRedis(c)
-
-	// * Validate options
-	c = validateOptions(c)
-
-	// * Create fallback db directory
-	if err := os.MkdirAll(c.Options.DBPath, 0755); err != nil {
-		logger.error(err, "Failed to create DB folder")
-	}
 
 	ctx := context.Background()
 	redisFallback := &RedisFallback{
@@ -38,8 +33,8 @@ func New(c Config) (*RedisFallback, error) {
 		writer: &Writer{
 			config:  c,
 			logger:  logger,
-			queue:   make(chan WriteRequest, c.Options.MaxQueue),
-			timer:   time.NewTicker(c.Options.TimeToWrite),
+			queue:   make(chan WriteRequest, c.Option.MaxQueue),
+			timer:   time.NewTicker(c.Option.TimeToWrite),
 			pending: make(map[string]interface{}),
 		},
 	}
@@ -47,11 +42,11 @@ func New(c Config) (*RedisFallback, error) {
 	// * check Redis connection
 	if err := redisClient.Ping(ctx).Err(); err != nil {
 		// * fallback mode
-		logger.error(err, "Failed to connect, Starting fallback mode")
+		logger.Error(err, "Failed to connect, Starting fallback mode")
 		redisFallback.changeToFallbackMode()
 	} else {
 		// * normal mode
-		logger.info("Starting normal mode")
+		logger.Info("Starting normal mode")
 		redisFallback.changeToNormalMode()
 	}
 
@@ -59,28 +54,6 @@ func New(c Config) (*RedisFallback, error) {
 	go redisFallback.startMemoryCleanup()
 
 	return redisFallback, nil
-}
-
-func initLogger(c Config) (*Logger, error) {
-	if c.Log == nil {
-		c.Log = &Log{
-			Path:    defaultLogPath,
-			Stdout:  false,
-			MaxSize: defaultLogMaxSize,
-		}
-	}
-	if c.Log.Path == "" {
-		c.Log.Path = defaultLogPath
-	}
-	if c.Log.MaxSize <= 0 {
-		c.Log.MaxSize = defaultLogMaxSize
-	}
-
-	logger, err := newLogger(c.Log)
-	if err != nil {
-		return nil, fmt.Errorf("Can not initialize logger: %v", err)
-	}
-	return logger, nil
 }
 
 func initRedis(c Config) *redis.Client {
@@ -108,31 +81,6 @@ func initRedis(c Config) *redis.Client {
 		DB:       c.Redis.DB,
 	})
 	return redisClient
-}
-
-func validateOptions(c Config) Config {
-	if c.Options == nil {
-		c.Options = &Options{
-			DBPath:   defaultDBPath,
-			MaxRetry: defaultMaxRetry,
-		}
-	}
-	if c.Options.DBPath == "" {
-		c.Options.DBPath = defaultDBPath
-	}
-	if c.Options.MaxRetry <= 0 {
-		c.Options.MaxRetry = defaultMaxRetry
-	}
-	if c.Options.MaxQueue <= 0 {
-		c.Options.MaxQueue = defaultMaxQueue
-	}
-	if c.Options.TimeToWrite <= 0 {
-		c.Options.TimeToWrite = defaultTimeToWrite
-	}
-	if c.Options.TimeToCheck <= 0 {
-		c.Options.TimeToCheck = defaultTimeToCheck
-	}
-	return c
 }
 
 func (rf *RedisFallback) removeJSONFile(key string) {
@@ -179,6 +127,51 @@ func (m *RedisFallback) sendEmail(ip string, reason string) {
 
 	err := smtp.SendMail(addr, auth, m.config.Email.From, m.config.Email.To, []byte(msg))
 	if err != nil {
-		m.logger.error(err, "Failed to send email")
+		m.logger.Error(err, "Failed to send email")
 	}
+}
+
+func validLoggerConfig(c Config) *Log {
+	if c.Log == nil {
+		c.Log = &Log{
+			Path:    defaultLogPath,
+			Stdout:  false,
+			MaxSize: defaultLogMaxSize,
+		}
+	}
+	if c.Log.Path == "" {
+		c.Log.Path = defaultLogPath
+	}
+	if c.Log.MaxSize <= 0 {
+		c.Log.MaxSize = defaultLogMaxSize
+	}
+	if c.Log.MaxBackup <= 0 {
+		c.Log.MaxBackup = defaultLogMaxBackup
+	}
+	return c.Log
+}
+
+func validOptionData(c Config) *Options {
+	if c.Option == nil {
+		c.Option = &Options{
+			DBPath:   defaultDBPath,
+			MaxRetry: defaultMaxRetry,
+		}
+	}
+	if c.Option.DBPath == "" {
+		c.Option.DBPath = defaultDBPath
+	}
+	if c.Option.MaxRetry <= 0 {
+		c.Option.MaxRetry = defaultMaxRetry
+	}
+	if c.Option.MaxQueue <= 0 {
+		c.Option.MaxQueue = defaultMaxQueue
+	}
+	if c.Option.TimeToWrite <= 0 {
+		c.Option.TimeToWrite = defaultTimeToWrite
+	}
+	if c.Option.TimeToCheck <= 0 {
+		c.Option.TimeToCheck = defaultTimeToCheck
+	}
+	return c.Option
 }

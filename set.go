@@ -36,10 +36,10 @@ func (rf *RedisFallback) setToRedis(key string, cache Cache) error {
 	data, err := json.Marshal(cache.Data)
 	data = []byte(strings.Trim(string(data), "\""))
 	if err != nil {
-		return rf.logger.error(err, "Failed to parse")
+		return rf.logger.Error(err, "Failed to parse")
 	}
 
-	for i := 0; i < rf.config.Options.MaxRetry; i++ {
+	for i := 0; i < rf.config.Option.MaxRetry; i++ {
 		err = rf.redis.Set(ctx, key, data, time.Duration(cache.TTL)*time.Second).Err()
 		if err == nil {
 			rf.cache.Store(key, cache)
@@ -47,7 +47,7 @@ func (rf *RedisFallback) setToRedis(key string, cache Cache) error {
 		}
 	}
 
-	rf.logger.info("[setToRedis] Switching to fallback mode")
+	rf.logger.Info("[setToRedis] Switching to fallback mode")
 	rf.mutex.Lock()
 	rf.changeToFallbackMode()
 	rf.mutex.Unlock()

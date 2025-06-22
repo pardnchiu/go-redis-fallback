@@ -1,11 +1,8 @@
-> [!Note]
-> This content is translated by LLM. Original text can be found [here](README.zh.md)
-
 # Redis Fallback
 
-> A Golang Redis fallback solution that automatically switches to local storage when the connection is unavailable and restores data when the connection is recovered.
+> 一個 Golang Redis 降級方案，當連線不可用時自動降級至本地存儲，並在連線恢復時實現自動復原。
 >
-> Inspired by the integration concepts of [php-redis](https://github.com/pardnchiu/php-redis), [php-cache-fallback](https://github.com/pardnchiu/php-cache-fallback), and [php-session-fallback](https://github.com/pardnchiu/php-session-fallback).
+> 延伸自 [php-redis](https://github.com/pardnchiu/php-redis)、[php-cache-fallback](https://github.com/pardnchiu/php-cache-fallback) 和 [php-session-fallback](https://github.com/pardnchiu/php-session-fallback) 的整合概念
 
 [![lang](https://img.shields.io/badge/lang-Go-blue)](README.zh.md) 
 [![license](https://img.shields.io/github/license/pardnchiu/go-redis-fallback)](LICENSE)
@@ -14,21 +11,21 @@
 [![readme](https://img.shields.io/badge/readme-EN-white)](README.md)
 [![readme](https://img.shields.io/badge/readme-ZH-white)](README.zh.md) 
 
-## Key Features
+## 三大主軸
 
-### Three-Tier Storage Architecture
-Memory cache + Redis + local file storage with automatic fault tolerance.
+### 三層儲存架構
+記憶體快取 + Redis + 本地檔案儲存，具備自動容錯機制
 
-### Graceful Fallback and Auto-Recovery
-Monitors Redis health during fallback and automatically synchronizes data and cleans local files upon recovery.
+### 優雅降級並自動復原
+降級時會定期監控 Redis 健康狀態，在連線復原時自動同步資料與清理本地檔案
 
-### Ensuring Data Integrity
-Stores data as JSON files during fallback mode to prevent loss, with TTL support.
+### 確保資料完整度
+回退模式期間將資料儲存為 JSON 檔案以防止遺失，並支援 TTL
 
-## Flowchart
+## 流程圖
 
 <details>
-<summary>Click to view</summary>
+<summary>點擊查看</summary>
 
 ```mermaid
 flowchart TD
@@ -127,20 +124,20 @@ flowchart TD
 
 </details>
 
-## Dependencies
+## 依賴套件
 
 - [`github.com/redis/go-redis/v9`](https://github.com/redis/go-redis/v9)
 - [`github.com/pardnchiu/go-logger`](https://github.com/pardnchiu/go-logger)<br>
-  If you don't need it, you can fork and replace it with your preferred logger. You can also vote [here](https://forms.gle/EvNLwzpHfxWR2gmP6) to let me know.
+  如果你不需要，你可以 fork 然後使用你熟悉的取代。更可以到[這裡](https://forms.gle/EvNLwzpHfxWR2gmP6)進行投票讓我知道。
 
-## Usage
+## 使用方法
 
-### Installation
+### 安裝
 ```bash
 go get github.com/pardnchiu/go-redis-fallback
 ```
 
-### Initialization
+### 初始化 / Initialization
 ```go
 package main
 
@@ -185,8 +182,7 @@ func main() {
 }
 ```
 
-## Configuration
-
+## 配置介紹 / Configuration
 ```go
 type Config struct {
   Redis   *Redis   // Redis configuration (required)
@@ -218,80 +214,80 @@ type Options struct {
 }
 ```
 
-## Available Functions
+## 可用函式
 
-### Instance Management
+### 實例管理
 
-- **New** - Create a new instance
+- **New** - 建立新的實例
   ```go
   client, err := rf.New(config)
   ```
-  - Initializes Redis connection
-  - Sets up the logging system
-  - Checks for unsynced files
+  - 初始化 Redis 連接
+  - 設定日誌系統
+  - 檢查未同步檔案
 
-- **Close** - Close the instance
+- **Close** - 關閉實例
   ```go
   err := client.Close()
   ```
-  - Closes Redis connection
-  - Clears pending writes
-  - Releases system resources
+  - 關閉 Redis 連接
+  - 清空待處理寫入
+  - 釋放系統資源
 
-### Data Management
+### 資料管理
 
-- **Set** - Insert data<br>
-  Automatically switches to local storage when Redis is unavailable.
+- **Set** - 插入資料<br>
+  Redis 失效時自動切換至本地儲存
   ```go
   err := client.Set("key", value, ttl)
   ```
 
-- **Get** - Retrieve data<br>
-  Memory cache is the first layer, Redis is the second, and local files are the fallback layer.
+- **Get** - 取得資料<br>
+  記憶體快取為第一層，Redis 為第二層，本地檔案為回退層
   ```go
   value, err := client.Get("key")
   ```
 
-- **Del** - Delete data
+- **Del** - 刪除資料
   ```go
   err := client.Del("key")
   ```
 
-### Storage Modes
+### 儲存模式
 
-- Normal Mode
-  > Redis is available
-  - Prioritizes writing to Redis
-  - Updates memory cache upon success
-  - Background synchronization ensures consistency
+- 正常模式
+  > Redis 可用
+  - 優先寫入 Redis
+  - 成功後更新記憶體快取
+  - 背景同步確保一致性
     
-- Fallback Mode
-  > Redis is unavailable
-  - Immediately updates memory cache
-  - Adds write operations to the queue
-  - Batch writes to local files
-  - Monitors Redis health status
+- 回退模式
+  > Redis 無法使用
+  - 立即更新記憶體快取
+  - 將寫入操作加入佇列
+  - 批次寫入本地檔案
+  - 監控 Redis 健康狀態
 
-### Fallback Process
+### 回退流程 / Fallback
 
-- Health Monitoring
-  > Periodically checks Redis connection status
-  - Automatically runs every TimeToCheck interval
-  - Attempts recovery when Redis is available
+- 健康監控
+  > 定期檢查 Redis 連接狀態
+  - 每 TimeToCheck 間隔自動執行
+  - Redis 可用時嘗試復原
 
-- Batch Operations
-  > Optimizes performance during fallback
-  - Adds writes to the queue in memory
-  - Batch writes to files every TimeToWrite interval
-  - Batch synchronizes to Redis during recovery
+- 批次操作
+  > 回退期間最佳化效能
+  - 在記憶體中將寫入加入佇列
+  - 每 TimeToWrite 間隔批次寫入檔案
+  - 復原期間批次同步至 Redis
 
-- Data Persistence
-  > Uses MD5-encoded layered file storage
-  - Files are stored in nested directories based on key hash
-  - JSON format includes metadata: key, data, type, timestamp, TTL
+- 資料持久化
+  > 使用 MD5 編碼的分層檔案儲存
+  - 檔案根據金鑰雜湊儲存在巢狀目錄中
+  - JSON 格式包含中繼資料：金鑰、資料、類型、時間戳、TTL
 
-## File Storage Structure
-> Implements layered directories using MD5 encoding
+## 檔案儲存結構
+> 使用 MD5 編碼實現分層目錄
 ```
 {DBPath}/db/
 ├── 0/                   # Redis database number
@@ -301,7 +297,7 @@ type Options struct {
 │   │   │   │   └── abcdef1234567890abcdef1234567890.json
 ```
 
-File content format:
+檔案內容格式
 ```json
 {
   "key": "original key value",
@@ -312,72 +308,72 @@ File content format:
 }
 ```
 
-## Feature Progress
-> Continuously improving
+## 功能進度
+> 持續改進中
 
-- General Operations
-  - [x] Get - Retrieve data
-  - [x] Set - Store data
-  - [x] Del - Delete key-value pairs
-  - [ ] Exists - Check if a key exists
-  - [ ] Expire/ExpireAt - Set expiration time
-  - [ ] TTL - Get remaining time-to-live
-  - [ ] Keys - Find keys matching a pattern
-  - [ ] Scan - Iterate keys
-  - [ ] Pipeline - Batch commands
-  - [ ] TxPipeline - Transactional batch
+- 一般操作
+  - [x] Get - 取得資料
+  - [x] Set - 儲存資料
+  - [x] Del - 刪除金鑰值
+  - [ ] Exists - 檢查金鑰是否存在
+  - [ ] Expire/ExpireAt - 設定過期時間
+  - [ ] TTL - 取得剩餘存活時間
+  - [ ] Keys - 尋找符合模式的金鑰
+  - [ ] Scan - 迭代金鑰
+  - [ ] Pipeline - 批次指令
+  - [ ] TxPipeline - 交易批次
 
-- String Operations
-  - [ ] SetNX - Set if not exists
-  - [ ] SetEX - Set with expiration time
-  - [ ] Incr/IncrBy - Increment value
-  - [ ] Decr/DecrBy - Decrement value
-  - [ ] MGet/MSet - Batch get/set multiple key-values
+- 字串操作
+  - [ ] SetNX - 不存在時設定
+  - [ ] SetEX - 設定並指定過期時間
+  - [ ] Incr/IncrBy - 遞增數值
+  - [ ] Decr/DecrBy - 遞減數值
+  - [ ] MGet/MSet - 批次取得/設定多個金鑰值
 
-- Hash Operations
-  - [ ] HSet/HGet - Set/Get hash fields
-  - [ ] HGetAll - Get all fields and values
-  - [ ] HKeys/HVals - Get all field names/values
-  - [ ] HDel - Delete hash fields
-  - [ ] HExists - Check if a field exists
+- 雜湊操作
+  - [ ] HSet/HGet - 設定/取得雜湊欄位
+  - [ ] HGetAll - 取得所有欄位和值
+  - [ ] HKeys/HVals - 取得所有欄位名稱/值
+  - [ ] HDel - 刪除雜湊欄位
+  - [ ] HExists - 檢查欄位是否存在
 
-- List Operations
-  - [ ] LPush/RPush - Add elements from left/right
-  - [ ] LPop/RPop - Remove elements from left/right
-  - [ ] LRange - Get range of elements
-  - [ ] LLen - Get list length
+- 列表操作
+  - [ ] LPush/RPush - 從左側/右側新增元素
+  - [ ] LPop/RPop - 從左側/右側移除元素
+  - [ ] LRange - 取得範圍元素
+  - [ ] LLen - 取得列表長度
 
-- Set Operations
-  - [ ] SAdd - Add elements to a set
-  - [ ] SMembers - Get all set members
-  - [ ] SRem - Remove elements from a set
-  - [ ] SCard - Get set cardinality
-  - [ ] SIsMember - Check if an element is in the set
+- 集合操作
+  - [ ] SAdd - 新增元素至集合
+  - [ ] SMembers - 取得所有集合成員
+  - [ ] SRem - 從集合移除元素
+  - [ ] SCard - 取得集合基數
+  - [ ] SIsMember - 檢查元素是否在集合中
 
-### Unsupported Features in Fallback Mode
+### 回退模式無法支援的功能
 
-- Blocking Operations
-  - BLPop/BRPop - Blocking left/right pop
+- 阻塞操作
+  - BLPop/BRPop - 阻塞式左側/右側彈出
 
-- Sorted Set Operations
-  - ZAdd - Add elements to sorted set
-  - ZRange/ZRevRange - Get range by score
-  - ZRank/ZRevRank - Get element rank
-  - ZScore - Get element score
-  - ZRem - Remove elements
+- 有序集合操作
+  - ZAdd - 新增元素至有序集合
+  - ZRange/ZRevRange - 依分數取得範圍
+  - ZRank/ZRevRank - 取得元素排名
+  - ZScore - 取得元素分數
+  - ZRem - 移除元素
 
-- Publish/Subscribe
-  - Publish - Publish messages
-  - Subscribe - Subscribe to channels
+- 發布/訂閱
+  - Publish - 發布訊息
+  - Subscribe - 訂閱頻道
 
-- Lua Scripts
-  - Eval/EvalSha - Execute Lua scripts
+- Lua 腳本
+  - Eval/EvalSha - 執行 Lua 腳本
 
-## License
+## 授權條款
 
-This project is licensed under the [MIT](LICENSE) license.
+此原始碼專案採用 [MIT](LICENSE) 授權。
 
-## Author
+## 作者
 
 <img src="https://avatars.githubusercontent.com/u/25631760" align="left" width="96" height="96" style="margin-right: 0.5rem;">
 

@@ -6,24 +6,30 @@ import (
 	"sync/atomic"
 	"time"
 
+	goLogger "github.com/pardnchiu/go-logger"
 	"github.com/redis/go-redis/v9"
 )
 
 const (
-	defaultLogPath     = "./logs/redisFallback"
-	defaultLogMaxSize  = 16 * 1024 * 1024
-	defaultDBPath      = "./files/redisFallback/db"
-	defaultMaxRetry    = 3
-	defaultMaxQueue    = 1000            // 最大排隊長度，預設 1000
-	defaultTimeToWrite = 3 * time.Second // 預設 Fallback 模式下寫入時間間隔
-	defaultTimeToCheck = 1 * time.Minute // 預設健康檢查時間間隔
+	defaultLogPath      = "./logs/redisFallback"
+	defaultLogMaxSize   = 16 * 1024 * 1024
+	defaultLogMaxBackup = 5
+	defaultDBPath       = "./files/redisFallback/db"
+	defaultMaxRetry     = 3
+	defaultMaxQueue     = 1000            // 最大排隊長度，預設 1000
+	defaultTimeToWrite  = 3 * time.Second // 預設 Fallback 模式下寫入時間間隔
+	defaultTimeToCheck  = 1 * time.Minute // 預設健康檢查時間間隔
 )
 
+// * 繼承至 pardnchiu/go-logger
+type Log = goLogger.Log
+type Logger = goLogger.Logger
+
 type Config struct {
-	Redis   *Redis       `json:"redis"`             // Redis 設定
-	Log     *Log         `json:"log,omitempty"`     // 日誌設定
-	Options *Options     `json:"options,omitempty"` // 選項設定
-	Email   *EmailConfig `json:"email,omitempty"`   // Email 通知設定
+	Redis  *Redis       `json:"redis"`            // Redis 設定
+	Log    *Log         `json:"log,omitempty"`    // 日誌設定
+	Option *Options     `json:"option,omitempty"` // 選項設定
+	Email  *EmailConfig `json:"email,omitempty"`  // Email 通知設定
 }
 
 type Redis struct {

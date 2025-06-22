@@ -54,12 +54,12 @@ func (w *Writer) writeToFile(key string, cache Cache) error {
 
 	// * Create fallback db directory
 	if err := os.MkdirAll(path.folderPath, 0755); err != nil {
-		return w.logger.error(err, "Failed to create folder")
+		return w.logger.Error(err, "Failed to create folder")
 	}
 
 	data, err := json.Marshal(cache)
 	if err != nil {
-		return w.logger.error(err, "Failed to parse")
+		return w.logger.Error(err, "Failed to parse")
 	}
 
 	return os.WriteFile(path.filepath, data, 0644)

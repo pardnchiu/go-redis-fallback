@@ -16,7 +16,7 @@ func (rf *RedisFallback) syncToRedis(key string, cache Cache) {
 	data, err := json.Marshal(cache.Data)
 	data = []byte(strings.Trim(string(data), "\""))
 	if err != nil {
-		rf.logger.error(err, "Failed to parse")
+		rf.logger.Error(err, "Failed to parse")
 		return
 	}
 	rf.redis.Set(ctx, key, data, time.Duration(cache.TTL)*time.Second)
@@ -30,7 +30,7 @@ func (rf *RedisFallback) changeToFallbackMode() {
 		return
 	}
 
-	rf.checker = time.NewTicker(rf.config.Options.TimeToCheck)
+	rf.checker = time.NewTicker(rf.config.Option.TimeToCheck)
 	go func() {
 		for range rf.checker.C {
 			ctx := context.Background()
@@ -48,7 +48,7 @@ func (rf *RedisFallback) changeToFallbackMode() {
 }
 
 func (rf *RedisFallback) changeToNormalMode() error {
-	folderPath := filepath.Join(rf.config.Options.DBPath, strconv.Itoa(rf.config.Redis.DB))
+	folderPath := filepath.Join(rf.config.Option.DBPath, strconv.Itoa(rf.config.Redis.DB))
 
 	var files []string
 	err := filepath.Walk(folderPath, func(path string, info os.FileInfo, err error) error {
@@ -62,19 +62,19 @@ func (rf *RedisFallback) changeToNormalMode() error {
 	})
 
 	if err != nil {
-		return rf.logger.error(err, "Failed to search folder")
+		return rf.logger.Error(err, "Failed to search folder")
 	}
 
 	for _, file := range files {
 		data, err := os.ReadFile(file)
 		if err != nil {
-			rf.logger.error(err, "Failed to read file")
+			rf.logger.Error(err, "Failed to read file")
 			continue
 		}
 
 		var cache Cache
 		if err := json.Unmarshal(data, &cache); err != nil {
-			rf.logger.error(err, "Failed to parse")
+			rf.logger.Error(err, "Failed to parse")
 			continue
 		}
 
@@ -83,7 +83,7 @@ func (rf *RedisFallback) changeToNormalMode() error {
 
 	rf.syncMemoryToRedis()
 	if err := rf.cleanupLocalFile(); err != nil {
-		rf.logger.error(err, "Failed to cleanup")
+		rf.logger.Error(err, "Failed to cleanup")
 	}
 
 	rf.isHealth = true
@@ -93,7 +93,7 @@ func (rf *RedisFallback) changeToNormalMode() error {
 
 func (rf *RedisFallback) syncMemoryToRedis() {
 	if !rf.isRecovering.CompareAndSwap(false, true) {
-		rf.logger.info("Already running recovery")
+		rf.logger.Info("Already running recovery")
 		return
 	}
 
@@ -110,7 +110,7 @@ func (rf *RedisFallback) syncMemoryToRedis() {
 			data, err := json.Marshal(item.Data)
 			data = []byte(strings.Trim(string(data), "\""))
 			if err != nil {
-				rf.logger.error(err, "Failed to parse")
+				rf.logger.Error(err, "Failed to parse")
 			} else {
 				remainingTTL := time.Duration(item.Timestamp+item.TTL-now) * time.Second
 				if remainingTTL > 0 {
@@ -134,7 +134,7 @@ func (rf *RedisFallback) syncMemoryToRedis() {
 
 func (rf *RedisFallback) startMemoryCleanup() {
 	if rf.isRecovering.Load() {
-		rf.logger.info("Recovery is in progress")
+		rf.logger.Info("Recovery is in progress")
 		return
 	}
 
@@ -154,18 +154,18 @@ func (rf *RedisFallback) startMemoryCleanup() {
 }
 
 func (rf *RedisFallback) cleanupLocalFile() error {
-	var folderPath = rf.config.Options.DBPath + "/" + fmt.Sprintf("%d", rf.config.Redis.DB)
+	var folderPath = rf.config.Option.DBPath + "/" + fmt.Sprintf("%d", rf.config.Redis.DB)
 
 	filesRemoved := 0
 	err := filepath.Walk(folderPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			rf.logger.error(err, "Failed to search folder")
+			rf.logger.Error(err, "Failed to search folder")
 			return nil
 		}
 
 		if !info.IsDir() && strings.HasSuffix(info.Name(), ".json") {
 			if err := os.Remove(path); err != nil {
-				rf.logger.error(err, "Failed to remove file")
+				rf.logger.Error(err, "Failed to remove file")
 			} else {
 				filesRemoved++
 			}
@@ -174,7 +174,7 @@ func (rf *RedisFallback) cleanupLocalFile() error {
 	})
 
 	if err != nil {
-		rf.logger.error(err, "Failed to remove file")
+		rf.logger.Error(err, "Failed to remove file")
 		return err
 	}
 
@@ -190,7 +190,7 @@ func (rf *RedisFallback) removeEmptyFolder(root string) int {
 	walkFn = func(path string) error {
 		entries, err := os.ReadDir(path)
 		if err != nil {
-			rf.logger.error(err, "Failed to read path")
+			rf.logger.Error(err, "Failed to read path")
 			return nil
 		}
 
@@ -204,7 +204,7 @@ func (rf *RedisFallback) removeEmptyFolder(root string) int {
 		if len(entries) == 0 && path != root {
 			err := os.Remove(path)
 			if err != nil {
-				rf.logger.error(err, "Failed to remove path")
+				rf.logger.Error(err, "Failed to remove path")
 			} else {
 				dirsRemoved++
 			}
