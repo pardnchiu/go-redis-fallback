@@ -7,12 +7,13 @@
 >
 > Inspired by the integration concepts of [php-redis](https://github.com/pardnchiu/php-redis), [php-cache-fallback](https://github.com/pardnchiu/php-cache-fallback), and [php-session-fallback](https://github.com/pardnchiu/php-session-fallback).
 
-[![lang](https://img.shields.io/badge/lang-Go-blue)](README.zh.md) 
-[![license](https://img.shields.io/github/license/pardnchiu/go-redis-fallback)](LICENSE)
-[![version](https://img.shields.io/github/v/tag/pardnchiu/go-redis-fallback)](https://github.com/pardnchiu/go-redis-fallback/releases)
-![card](https://goreportcard.com/badge/github.com/pardnchiu/go-redis-fallback)<br>
+[![pkg](https://pkg.go.dev/badge/github.com/pardnchiu/go-redis-fallback.svg)](https://pkg.go.dev/github.com/pardnchiu/go-redis-fallback)
+[![card](https://goreportcard.com/badge/github.com/pardnchiu/go-redis-fallback)](https://goreportcard.com/report/github.com/pardnchiu/go-redis-fallback)
+[![codecov](https://img.shields.io/codecov/c/github/pardnchiu/go-redis-fallback)](https://app.codecov.io/github/pardnchiu/go-redis-fallback)
+[![version](https://img.shields.io/github/v/tag/pardnchiu/go-redis-fallback?label=release)](https://github.com/pardnchiu/go-redis-fallback/releases)
+[![license](https://img.shields.io/github/license/pardnchiu/go-redis-fallback)](LICENSE)<br>
 [![readme](https://img.shields.io/badge/readme-EN-white)](README.md)
-[![readme](https://img.shields.io/badge/readme-ZH-white)](README.zh.md) 
+[![readme](https://img.shields.io/badge/readme-ZH-white)](README.zh.md)
 
 ## Key Features
 
@@ -136,8 +137,15 @@ flowchart TD
 ## Usage
 
 ### Installation
+
+> [!NOTE]
+> Latest commits may change. Recommended to use tagged versions.<br>
+> Commits containing only documentation updates or non-functional changes will be rebased later.
+
 ```bash
-go get github.com/pardnchiu/go-redis-fallback
+go get github.com/pardnchiu/go-redis-fallback@[VERSION]
+
+git clone --depth 1 --branch [VERSION] https://github.com/pardnchiu/go-redis-fallback.git
 ```
 
 ### Initialization
@@ -376,6 +384,10 @@ File content format:
 ## License
 
 This project is licensed under the [MIT](LICENSE) license.
+
+## Star
+
+[![Star](https://api.star-history.com/svg?repos=pardnchiu/go-redis-fallback&type=Date)](https://www.star-history.com/#pardnchiu/go-redis-fallback&Date)
 
 ## Author
 

@@ -4,12 +4,13 @@
 >
 > 延伸自 [php-redis](https://github.com/pardnchiu/php-redis)、[php-cache-fallback](https://github.com/pardnchiu/php-cache-fallback) 和 [php-session-fallback](https://github.com/pardnchiu/php-session-fallback) 的整合概念
 
-[![lang](https://img.shields.io/badge/lang-Go-blue)](README.zh.md) 
-[![license](https://img.shields.io/github/license/pardnchiu/go-redis-fallback)](LICENSE)
-[![version](https://img.shields.io/github/v/tag/pardnchiu/go-redis-fallback)](https://github.com/pardnchiu/go-redis-fallback/releases)
-![card](https://goreportcard.com/badge/github.com/pardnchiu/go-redis-fallback)<br>
+[![pkg](https://pkg.go.dev/badge/github.com/pardnchiu/go-redis-fallback.svg)](https://pkg.go.dev/github.com/pardnchiu/go-redis-fallback)
+[![card](https://goreportcard.com/badge/github.com/pardnchiu/go-redis-fallback)](https://goreportcard.com/report/github.com/pardnchiu/go-redis-fallback)
+[![codecov](https://img.shields.io/codecov/c/github/pardnchiu/go-redis-fallback)](https://app.codecov.io/github/pardnchiu/go-redis-fallback)
+[![version](https://img.shields.io/github/v/tag/pardnchiu/go-redis-fallback?label=release)](https://github.com/pardnchiu/go-redis-fallback/releases)
+[![license](https://img.shields.io/github/license/pardnchiu/go-redis-fallback)](LICENSE)<br>
 [![readme](https://img.shields.io/badge/readme-EN-white)](README.md)
-[![readme](https://img.shields.io/badge/readme-ZH-white)](README.zh.md) 
+[![readme](https://img.shields.io/badge/readme-ZH-white)](README.zh.md)
 
 ## 三大主軸
 
@@ -133,8 +134,15 @@ flowchart TD
 ## 使用方法
 
 ### 安裝
+
+> [!NOTE]
+> 最新 commit 可能會變動，建議使用標籤版本<br>
+> 針對僅包含文檔更新等非功能改動的 commit，後續會進行 rebase
+
 ```bash
-go get github.com/pardnchiu/go-redis-fallback
+go get github.com/pardnchiu/go-redis-fallback@[VERSION]
+
+git clone --depth 1 --branch [VERSION] https://github.com/pardnchiu/go-redis-fallback.git
 ```
 
 ### 初始化 / Initialization
@@ -372,6 +380,10 @@ type Options struct {
 ## 授權條款
 
 此原始碼專案採用 [MIT](LICENSE) 授權。
+
+## 星
+
+[![Star](https://api.star-history.com/svg?repos=pardnchiu/go-redis-fallback&type=Date)](https://www.star-history.com/#pardnchiu/go-redis-fallback&Date)
 
 ## 作者
 
