@@ -1,2 +1,5 @@
 .DS_Store
 *.log
+
+.doc/
+wiki-worker/
